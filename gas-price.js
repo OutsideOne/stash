@@ -1,6 +1,6 @@
-const region = persistentStore.read("gas_price_region", "sichuan"); // 读取存储的地区，默认为四川
+const region = "成都";
 
-const query_addr = `http://m.qiyoujiage.com/sichuan.shtml`; // 构造查询地址
+const query_addr = `http://m.qiyoujiage.com/${region}.shtml`;
 
 const xhr = new XMLHttpRequest();
 xhr.open("GET", query_addr);
@@ -9,7 +9,7 @@ xhr.onload = function() {
   if (xhr.status === 200) {
     const data = xhr.responseText;
 
-    const reg_price = /<dl>[\s\S]+?<dt>(.*油)<\/dt>[\s\S]+?<dd>(.*)\(元\/升\)<\/dd>/gm; // 匹配油价
+    const reg_price = /<dl>[\s\S]+?<dt>(.*油)<\/dt>[\s\S]+?<dd>(.*)\(元\/升\)<\/dd>/gm;
 
     const prices = [];
     let m;
@@ -26,14 +26,14 @@ xhr.onload = function() {
     const adjust_trend = "";
     const adjust_value = "";
 
-    const reg_adjust_tips = /<div class="tishi"> <span>(.*)<\/span><br\/>([\s\S]+?)<\/dd>/; // 匹配调整信息
+    const reg_adjust_tips = /<div class="tishi"> <span>(.*)<\/span><br\/>([\s\S]+?)<\/dd>/;
     const adjust_tips_match = data.match(reg_adjust_tips);
 
     if (adjust_tips_match && adjust_tips_match.length === 3) {
-      adjust_date = adjust_tips_match[1].split("价")[1].slice(0, -2); // 提取调整日期
+      adjust_date = adjust_tips_match[1].split("价")[1].slice(0, -2);
 
       adjust_value = adjust_tips_match[2];
-      adjust_trend = (adjust_value.indexOf("下调") > -1 || adjust_value.indexOf("下跌") > -1) ? "↓" : "↑"; // 判断调整趋势
+      adjust_trend = (adjust_value.indexOf("下调") > -1 || adjust_value.indexOf("下跌") > -1) ? "↓" : "↑";
 
       // 提取调整幅度
       const adjust_value_re = /([\d\.]+)元\/升-([\d\.]+)元\/升/;
@@ -55,9 +55,9 @@ xhr.onload = function() {
       adjust_date,
       adjust_trend,
       adjust_value,
-    }); // 返回所有信息
+    });
   } else {
-    done({}); // 请求失败时返回空对象
+    done({});
   }
 };
 xhr.send();
