@@ -20,7 +20,7 @@ $httpClient.get({
     const content = `${gas92Price.name}  ${gas92Price.value}\n${friendlyTips}`;
 
     const body = {
-        title: "成都实时油价信息",
+        title: "实时油价信息",
         content: content,
         icon: "fuelpump.fill"
     };
