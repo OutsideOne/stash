@@ -9,6 +9,10 @@ if (typeof $argument !== 'undefined' && $argument !== '') {
     region = $argument;
 }
 
+$persistentStore.write("chengdu", "gas_price_region");
+$done({settings: "ok"});
+
+
 const region_pref = $persistentStore.read("gas_price_region");
 if (typeof region_pref !== 'undefined' && region_pref !== '') {
     region = region_pref;
