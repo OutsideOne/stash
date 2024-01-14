@@ -12,5 +12,5 @@ tiles:
 
 script-providers:
   gas-price:
-    url: https://raw.githubusercontent.com/OutsideOne/stash/main/gas-price.js
+    url: https://raw.githubusercontent.com/OutsideOne/stash/main/gas%26price.js
     interval: 86400
