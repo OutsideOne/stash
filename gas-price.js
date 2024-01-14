@@ -1,24 +1,16 @@
-/*
- * 汽油价格查询解析(Stash脚本)
- * 
- */
-
 // 指定查询地区，可通过argument或persistentStore设置，后者优先级高
 var region = 'chengdu';
 if (typeof $argument !== 'undefined' && $argument !== '') {
     region = $argument;
 }
 
-$persistentStore.write("chengdu", "gas_price_region");
-$done({settings: "ok"});
-
-
 const region_pref = $persistentStore.read("gas_price_region");
 if (typeof region_pref !== 'undefined' && region_pref !== '') {
     region = region_pref;
 }
 
-const query_addr = `http://m.qiyoujiage.com/${region}.shtml`;
+// 用网页的URL替换原来的网络API
+const query_addr = `http://m.qiyoujiage.com/sichuan/${region}.shtml`;
 
 $httpClient.get(
     {
@@ -33,7 +25,8 @@ $httpClient.get(
             done({});
         }
         else {
-            const reg_price = /<dl>[\s\S]+?<dt>(.*油)<\/dt>[\s\S]+?<dd>(.*)\(元\)<\/dd>/gm;
+            // 用正则表达式匹配网页中的油价信息
+            const reg_price = /<li><span>(.*)<\/span><em>(.*)<\/em><\/li>/gm;
 
             var prices = [];
             var m = null;
@@ -83,7 +76,7 @@ $httpClient.get(
             const friendly_tips = `${adjust_date} ${adjust_trend} ${adjust_value}`;
 
             if (prices.length !== 4) {
-                console.log(`解析油价信息失败, 数量=${prices.length}, 请反馈至 @RS0485: URL=${query_addr}`);
+                console.log(`解析油价信息失败, 数量=${prices.length}, 请反馈至 : URL=${query_addr}`);
                 done({});
             }
             else {
