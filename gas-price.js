@@ -1,4 +1,4 @@
-var region = $argument || $persistentStore.read("gas_price_region") || 'hainan';
+var region = $argument || $persistentStore.read("gas_price_region") || 'sichuan';
 const queryAddr = `http://m.qiyoujiage.com/${region}.shtml`;
 
 $httpClient.get({
