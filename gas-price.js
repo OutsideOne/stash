@@ -1,60 +1,81 @@
-/*
- * 汽油价格查询解析(Stash脚本)
- */
+var region = $argument || $persistentStore.read("gas_price_region") || 'hainan';
+const queryAddr = `http://m.qiyoujiage.com/${region}.shtml`;
 
-// 指定查询地区，可通过argument或persistentStore设置，后者优先级高
-var region = 'hainan';
-if (typeof $argument !== 'undefined' && $argument !== '') {
-    region = $argument;
+$httpClient.get({
+    url: queryAddr,
+    headers: {
+        'referer': 'http://m.qiyoujiage.com/',
+        'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/108.0.0.0 Safari/537.36'
+    }
+}, (error, response, data) => {
+    if (error) {
+        // 如果发生错误，直接结束脚本
+        return;
+    }
+
+    const gas92Price = parseGasPrice(data, '92#');
+
+    if (!gas92Price) {
+        // 如果无法解析92号汽油价格，直接结束脚本
+        return;
+    }
+
+    const adjustment = parseAdjustment(data);
+
+    const friendlyTips = `${adjustment.date} ${adjustment.trend} ${adjustment.value}`;
+    const content = `${gas92Price.name}  ${gas92Price.value}\n${friendlyTips}`;
+
+    const body = {
+        title: "实时油价信息",
+        content: content,
+        icon: "fuelpump.fill"
+    };
+
+    $done(body);
+});
+
+function parseGasPrice(data, gasType) {
+    const regPrice = new RegExp(`<dl>[\\s\\S]+?<dt>${gasType}油<\\/dt>[\\s\\S]+?<dd>(.*)\$begin:math:text$元\\$end:math:text$<\\/dd>`, 'gm');
+    const match = regPrice.exec(data);
+
+    if (match && match.length === 2) {
+        return {
+            name: `${gasType}油`,
+            value: `${match[1]} 元/L`
+        };
+    }
+
+    return null;
 }
 
-const region_pref = $persistentStore.read("gas_price_region");
-if (typeof region_pref !== 'undefined' && region_pref !== '') {
-    region = region_pref;
+function parseAdjustment(data) {
+    const regAdjustTips = /<div class="tishi"> <span>(.*)<\/span><br\/>([\s\S]+?)<br\/>/;
+    const match = data.match(regAdjustTips);
+
+    if (match && match.length === 3) {
+        const date = match[1].split('价')[1].slice(0, -2);
+        const value = parseAdjustmentValue(match[2]);
+        const trend = (value.indexOf('下调') > -1 || value.indexOf('下跌') > -1) ? '↓' : '↑';
+
+        return {
+            date,
+            trend,
+            value
+        };
+    }
+
+    return {};
 }
 
-const query_addr = `http://m.qiyoujiage.com/${region}.shtml`;
+function parseAdjustmentValue(value) {
+    const re = /([\d\.]+)元\/升-([\d\.]+)元\/升/;
+    const match = value.match(re);
 
-$httpClient.get(
-    {
-        url: query_addr,
-        headers: {
-            'referer': 'http://m.qiyoujiage.com/',
-            'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/108.0.0.0 Safari/537.36'
-        },
-    }, (error, response, data) => {
-        if (error) {
-            // 删除解析油价失败反馈
-            done();
-        }
-        else {
-            const reg_price = /<dl>[\s\S]+?<dt>(.*油)<\/dt>[\s\S]+?<dd>(.*)\(元\)<\/dd>/gm;
-
-            var prices = [];
-            var m = null;
-
-            while ((m = reg_price.exec(data)) !== null) {
-                // 只显示92号汽油
-                if (m[1] === '92') {
-                    prices.push({
-                        name: m[1],
-                        value: `${m[2]} 元/L`
-                    });
-                }
-            }
-
-            if (prices.length !== 1) {
-                console.log(`解析油价信息失败, 数量=${prices.length}, 请反馈至 @RS0485: URL=${query_addr}`);
-                done();
-            }
-            else {
-                body = {
-                    title: "实时油价信息",
-                    content: `${prices[0].name}  ${prices[0].value}`,
-                    icon: "fuelpump.fill"
-                };
-
-                $done(body);
-            }
-        }
-    });
+    if (match && match.length === 3) {
+        return `${match[1]}-${match[2]}元/L`;
+    } else {
+        const re2 = /[\d\.]+元\/吨/;
+        const match2 = value.match(re2);
+        return match2 ? match2[0] : value;
+    }
+}
