@@ -1,6 +1,6 @@
 name: 实时油价查询
 desc: >-
-  通过网络API查询当前油价，默认查询地区为四川省
+  通过网络API查询当前油价，默认查询地区为成都市
 tiles:
   - name: gas-price
     interval: 3600
@@ -8,7 +8,7 @@ tiles:
     content: '刷新中...'
     icon: 'fuelpump.fill'
     backgroundColor: '#FB8C00'
-    argument: 'sichuan'
+    argument: 'chengdu'
 
 script-providers:
   gas-price:
