@@ -1,6 +1,6 @@
 const region = persistentStore.read("gas_price_region", "sichuan"); // 读取存储的地区，默认为四川
 
-const query_addr = `http://m.qiyoujiage.com/${region}.shtml`; // 构造查询地址
+const query_addr = `http://m.qiyoujiage.com/sichuan.shtml`; // 构造查询地址
 
 const xhr = new XMLHttpRequest();
 xhr.open("GET", query_addr);
