@@ -1,6 +1,4 @@
-const region = persistentStore.read("gas_price_region", "成都");
-
-const query_addr = `http://m.qiyoujiage.com/${region}.shtml`;
+const query_addr = `http://m.qiyoujiage.com/sichuan/chengdu.shtml`;
 
 const xhr = new XMLHttpRequest();
 xhr.open("GET", query_addr);
