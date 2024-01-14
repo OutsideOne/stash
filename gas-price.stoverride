@@ -1,6 +1,6 @@
 name: 实时油价查询
 desc: >-
-  通过网络API查询当前油价，默认查询地区为四川省
+  通过网络API查询当前油价，默认查询地区为成都市
 
 tiles:
   - name: gas-price
