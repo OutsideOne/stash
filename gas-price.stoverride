@@ -9,7 +9,7 @@ tiles:
     content: '刷新中...'
     icon: 'fuelpump.fill'
     backgroundColor: '#FB8C00'
-    argument: 'chengdu'
+    argument: 'sichuan'
 
 script-providers:
   gas-price:
