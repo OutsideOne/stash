@@ -1,20 +1,21 @@
 // 汽油价格查询解析(Stash脚本)
 //
 
-// 指定查询地区，可通过argument或persistentStore设置，后者优先级高
-var region = <span class="math-inline">persistentStore\.read\("gas\_price\_region", "chengdu"\);
-const query\_addr \= \`http\://m\.qiyoujiage\.com/</span>{region}.shtml`;
+// 指定查询地区，默认成都
+var region = persistentStore.read("gas_price_region", "成都");
 
-<span class="math-inline">httpClient\.get\(
-\{
-url\: query\_addr,
-headers\: \{
-'referer'\: '\[http\://m\.qiyoujiage\.com/\]\(http\://m\.qiyoujiage\.com/\)',
-<0\>'user\-agent'\: 'Mozilla/5\.0 \(Windows NT 10\.0; Win64; x64\) AppleWebKit/537\.36 \(KHTML, like Gecko\) Chrome/108\.0\.0\.0 Safari/537\.36'
-\},
-\}, \(erro</0\>r, response, data\) \=\> \{
-if \(error\) \{
-console\.log\(\`解析油价信息失败, 请反馈至 @RS0485\: URL\=</span>{query_addr}`);
+const query_addr = `http://m.qiyoujiage.com/${region}.shtml`;
+
+httpClient.get(
+    {
+        url: query_addr,
+        headers: {
+            'referer': '[http://m.qiyoujiage.com/](http://m.qiyoujiage.com/)',
+            'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/108.0.0.0 Safari/537.36'
+        },
+    }, (error, response, data) => {
+        if (error) {
+            console.log(`解析油价信息失败, 请反馈至 @RS0485: URL=${query_addr}`);
             done({});
         }
         else {
@@ -51,4 +52,24 @@ console\.log\(\`解析油价信息失败, 请反馈至 @RS0485\: URL\=</span>{qu
 
                 const adjust_value_re = /([\d\.]+)元\/升-([\d\.]+)元\/升/;
                 const adjust_value_re2 = /[\d\.]+元\/吨/;
-                const adjust_value_match = adjust_value
+                const adjust_value_match = adjust_value.match(adjust_value_re);
+
+                if (adjust_value_match && adjust_value_match.length === 3) {
+                    adjust_value = `${adjust_value_match[1]}-${adjust_value_match[2]} 元/L`;
+                }
+                else {
+                    adjust_value_match2 = adjust_value.match(adjust_value_re2);
+                    if (adjust_value_match2) {
+                        adjust_value = adjust_value_match2[0];
+                    }
+                }
+            }
+
+            done({
+                prices,
+                adjust_date,
+                adjust_trend,
+                adjust_value,
+            });
+        }
+    });
